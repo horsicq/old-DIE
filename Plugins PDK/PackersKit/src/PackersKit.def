@@ -1,0 +1,6 @@
+LIBRARY PackersKit
+EXPORTS DiePlugName
+EXPORTS DiePlugProc
+EXPORTS DiePlugHwnd
+EXPORTS DiePlugPe
+EXPORTS DiePlugHwndEx

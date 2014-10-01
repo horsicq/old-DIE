@@ -1,0 +1,178 @@
+**********************************************************************
+Author: TMS Software
+        Copyright © 1996-2006
+        E-mail: info@tmssoftware.com
+        Web: http://www.tmssoftware.com
+**********************************************************************
+
+Delphi 5.0/6.0/7.0/2005/2006 & C++Builder 5.0/6.0/2006
+
+
+Files :
+-----
+  
+  AdvLstD5.zip : component files for Delphi 5.0
+  AdvLstD6.zip : component files for Delphi 6.0
+  AdvLstD7.zip : component files for Delphi 7.0
+  AdvLstD2005.zip : component files for Delphi 2005
+  AdvLstD2005.zip : component files for Delphi 2006 &  C++Builder 2006
+  
+  AdvLstC5.zip : component files for C++Builder 5.0
+  AdvLstC6.zip : component files for C++Builder 6.0
+  
+Release 1.6.2.0 :
+-----------------
+
+ save / load to CSV, XLS files, streams
+ save to HTML, DOC, formatted ASCII, XML
+ save/load column sizes
+ clipboard enabled
+ automatic printing with optional title, pagenummer, date, time, border,
+                         cell fonts, colors, custom drawing, fit to page
+ column sorting + full sort when clicking on column header + image indication
+ header hottracking, item hottrack
+ subitem images
+ owner draw items
+ easy text formatting
+ header images
+ column reordering
+ autosize column function
+ url aware
+ automatic hinting for uncomplete text
+ multiline/wordwrapped items
+ RTF capability
+ dynamic scroll hints
+ subitem editing
+ programmatically move,swap items & columns
+ background images
+ filterbar (COMCTL32 v5+)
+ DB aware & non DB aware version
+
+Feature revision history :
+------------------------
+
+ 1.0  : first release
+ 1.1  : added column size save/load
+        added autosize function
+        improved ownerdraw function
+        improved sorting
+        improved CSV load
+ 1.2  : URL aware
+        automatic hinting for uncomplete text
+        vertical alignment of text
+        multiline items
+        improved ownerdraw, improved printing, improved demo
+ 1.3  : Improved printing with different border styles, fit to page,
+        custom page splitting
+        Several new styles : selectioncolor,flat header, fixed headers
+ 1.4  : input output to streams / files
+        improved print settings
+        rich text capabilities
+        scroll hint
+        leftclickcell & right click cell
+        new methods SwapItems, MoveItem
+        item rearranging
+        OnColumnSized event
+        DB aware version included : TDBAdvListView
+ 1.45 : save/load from XLS files
+        save to DOC and formatted ASCII files
+        subitem editing
+ 1.46 : programmatically swap,move items & columns
+        right header click event
+        improved subitem editing
+ 1.47 : Improved rich text support, print rich text, superscript & subscript
+        Fixed column header bug
+        Header sort up/down glyph bitmaps; sort glyph positioning
+        Header font
+        SelectionTextColor
+        Wallpaper
+ 1.48 : Clipboard functions
+        Subitem selection
+        Improved HTML export
+        Save to XML added
+ 1.50 : HTML formatted items
+        Filterbar support (COMCTL32 v5+)
+        Improved printing
+        Save column widths in inifile or registry
+        Items and subitems can be mixed editable or read-only
+        SaveToFile, LoadFromFile save item and subitem image indexes
+ 1.51 : Improved : subitem editing
+        New HTML engine features supported
+ 1.52 : Improved : Printing
+        Improved : CSV file input/output
+        Improved : HTML file output
+        Improved : support across different COMCTL32 versions
+ 1.53 : New : detailview capability
+        New : item indenting
+        New : multiline & owner draw column headers  
+        New : headers with HTML formatted text
+        New : AnchorEnter, AnchorExit events added
+        Improved : CSV input
+        Improved : HTML output
+        Improved : printing
+        Improved : subitem editing
+        TDBAdvListView :
+        New : memo fields can be shown in detail view       
+        Improved : DB-awareness       
+ 1.54 : New : custom checkbox glyphs
+        New : hilight & error marking support
+        New: HTML hint compatibility
+        Improved XLS file import
+        Improved URL handling  
+        Improved : latest HTML formatting features
+ 1.55 : Delphi 7 compatibility added
+        Improved Windows XP support
+ 1.6  : Improved SaveToHTML handling
+        New: EditFilter method added to set focus on filter control 
+ 1.6.1: Added support for Delphi 2005
+ 1.6.2: Added support for Delphi 2006 & C++Builder 2006
+        New: OnDrawDetailProp event added
+        New: SaveWithHTML parameter added to Save functions
+
+
+
+Usage:
+------
+ Use of TMS software components in applications requires a license.
+ A license can be obtained by registration. A single developer license
+ registration is available as well as a site license.
+ With the purchase of one single developer license, one developer in
+ the company is entitled to:
+ - use of registered version that contains full source code and no
+   limitations 
+ - free updates for a full version cycle
+ - free email priority support & access to support newsgroups
+ - discounts to purchases of other products
+
+ With a site license, multiple developers in the company are entitled
+ to:
+ - use of registered version that contains full source code and no
+   limitations 
+ - add additional developers at any time who make use of the components
+ - free updates for a full version cycle
+ - free email priority support & access to support newsgroups
+ - discounts to purchases of other products
+
+ Online order information can be found at:
+ http://www.tmssoftware.com/orders.htm
+
+Note: 
+-----
+
+ The components are also part of the TMS Component Pack bundle, see 
+ http://www.tmssoftware.com/tmspack.htm
+
+
+Help, hints, tips, bug reports:
+-------------------------------
+ Send any questions/remarks/suggestions to : help@tmssoftware.com
+
+ Before contacting support about a possible issue with the component
+ you encounter, make sure that you are using the latest version of the 
+ component.
+ If a problem persists with the latest version, provide information 
+ about which Delphi or C++Builder version you are using as well as
+ the operating system and if possible, steps to reproduce the problem
+ you encounter. That will guarantee the fastest turnaround times for
+ your support case. 
+

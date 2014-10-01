@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<BorlandProject>
+  <PersonalityInfo>
+    <Option>
+      <Option Name="Personality">Default.Personality</Option>
+      <Option Name="ProjectType"></Option>
+      <Option Name="Version">1.0</Option>
+      <Option Name="GUID">{F2CA9D5A-1687-478A-B787-E1150941299A}</Option>
+    </Option>
+  </PersonalityInfo>
+  <Default.Personality>
+    
+    <Projects>
+      <Projects Name="MPHexEditor_D10.bpl">MPHexEditor_D10.bdsproj</Projects>
+      <Projects Name="MPHexEditorDsgn_D10.bpl">MPHexEditorDsgn_D10.bdsproj</Projects>
+      <Projects Name="Targets">MPHexEditor_D10.bpl MPHexEditorDsgn_D10.bpl</Projects>
+    </Projects>
+    <Dependencies/>
+  </Default.Personality>
+</BorlandProject>

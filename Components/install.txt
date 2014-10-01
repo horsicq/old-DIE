@@ -1,0 +1,171 @@
+
+      ////////////////////////////////////////////////// 
+      //   I M P O R T A N T    R E M A R K  !!!!!    //
+      //                                              //  
+      //  For a succesful install of the components,  //
+      //       follow  A L L  steps below             //
+      //                                              //   
+      //////////////////////////////////////////////////
+
+
+Installation :
+--------------
+
+ Unzipping files
+ _______________
+
+ For Delphi 5,6,7,2005,2006 & C++Builder 5,6,2006
+ ------------------------------------------------
+
+ Unzip the appropriate distribution file for your IDE into a separate directory,
+ further referred to as {$TMSDIR} 
+
+ Delphi 5              : AdvLstD5.zip
+ Delphi 6              : AdvLstD6.zip
+ Delphi 7              : AdvLstD7.zip
+ Delphi 2005 VCL Win32 : AdvLstD2005.zip 
+ Delphi 2006 VCL Win32 : AdvLstD2006.zip 
+ 
+ C++Builder 5          : AdvLstC5.zip 
+ C++Builder 6          : AdvLstC6.zip 
+ C++Builder 2006       : AdvLstD2006.zip 
+
+
+ Setting library paths
+ _____________________
+
+ For Delphi 5,6,7 & C++Builder 5,6
+ ---------------------------------
+ Under Tools, Environment Options, Library, add the directory where
+ the TMS components have been installed {$TMSDIR} to the library path
+
+
+ For Delphi 2005 VCL Win32 components
+ ------------------------------------
+ 
+ Under Tools, Environment Options, Library, add the directory where
+ the TMS components have been installed {$TMSDIR} to the Win32 library path
+
+ For Delphi 2005 VCL.NET components
+ ------------------------------------
+
+ Under Tools, Environment Options, Library, add the directory where
+ the TMS components have been installed {$TMSDIR} to the .NET library path
+
+
+
+ Installing components
+ _____________________
+
+ In Delphi or C++Builder, select File, Open
+ and browse for the appropriate package file.
+
+  Delphi 5  : AdvListviewPkgD5.DPK
+  Delphi 6  : AdvListviewPkgD6.DPK 
+  Delphi 7  : AdvListviewPkgD7.DPK 
+
+  C++Builder 5 : AdvListviewPkgC5.BPK
+  C++Builder 6 : AdvListviewPkgC6.BPK 
+
+  After opening the package file, choose Compile and after
+  compilation, select Install
+
+
+  For Delphi 2005
+  ---------------
+
+  VCL Win32 component
+
+  In the IDE, select File, Open
+  browse for AlvPkgD2005.bdsproj
+  From the project manager, right click on the AlvPkgD2005.bdsproj project and from the menu, choose
+  Install VCL package
+
+
+ 
+  For Delphi 2006 & C++Builder 2006
+  ---------------------------------
+
+  Close the IDE, run Setup.exe and restart the IDE.
+
+
+
+  Installing online help
+  ______________________
+
+  Delphi 5,6,7 & C++Builder 5,6
+  -----------------------------
+
+  Go through menu Help, Customize and add following file to the Index tab:
+  
+  C++Builder 5 : AdvListviewB5.HLP 
+  C++Builder 6 : AdvListviewB6.HLP 
+  Delphi 5     : AdvListviewD5.HLP
+  Delphi 6     : AdvListviewD6.HLP
+  Delphi 7     : AdvListviewD7.HLP
+
+  For Delphi 6,7 it is required to first put the AdvListviewDx.ALS file in the
+  {$DELPHI}\Help directory !
+
+
+  Delphi 2005
+  -----------
+
+  Close the Delphi 2005 IDE
+  Execute RegHelpBDS3W.bat
+  Restart the IDE
+
+  
+  Delphi 2006
+  -----------
+
+  No extra steps required
+
+
+
+
+Tips:
+-----
+1) Installing component updates
+-------------------------------
+
+Before installing component updates, make sure to remove FIRST ALL previous version files.
+
+This includes:
+
+for Delphi:
+all related .DCU, .DCP, .BPL files 
+
+for C++Builder:
+all related .DCU, .HPP, .OBJ, .BPI, .DCP, .TDS, .LIB files 
+
+Note that Delphi or C++Builder could have generated files in the 
+{$DELPHI}\Projects\Lib folder or \Windows\System32 folder.
+
+
+
+2) Installing multiple binary distributed trial versions
+--------------------------------------------------------
+
+As Delphi & C++Builder perform strict binary compatibility checks on binary distributed units such as trial versions of the components, this can cause a problem when using multiple different binary component distributions that have a shared unit (for example: PictureContainer.DCU unit, AdvEdit.DCU unit ...) This will prevent the installation of multiple binary trial distributions at the same time in Delphi or C++Builder. The only workaround to use these different trial distribution is to install these in different folders and use the different component packages alternatingly. This binary compatibility issue is of course not present when using the full source based registered version distributions.
+
+
+3) IDE versions
+---------------
+TMS software generates binary trial versions with the latest service pack levels for Borland IDEs. Make sure that you have the latest Borland update packs installed. 
+For Delphi 6, make sure that the RTL3 update is also installed. If this is not the case, this can for some components result in the error : "Unit XXXXX was compiled with a different version of VarUtils.VarDateFromStr". 
+
+
+4) Property errors after component updates
+------------------------------------------
+If a property error occurs after installing a component update upon opening an existing form file in your applications, ignore this error, save the form file and reopen. The problem should have disappeared.
+
+
+5) Components disappearing from the palette after installing a component update
+-------------------------------------------------------------------------------
+Delphi or C++Builder has most likely moved the component to hidden components because of the uninstall. Go to the Configure Palette menu and unhide the component and these should reappear correct on the component palette.
+
+
+6) Latest information
+---------------------
+Check http://www.tmssoftware.com/tips.htm

@@ -1,0 +1,17 @@
+#######################################
+# Signatures for Unpack Informator    #
+#######################################
+# Author: Guru.eXe/tPORt              #
+#######################################
+# web:                                #
+#  http://guru-exe.ripgames.org/      #
+# email:                              #
+#  darkguru@pisem.net                 #
+#######################################
+# copyright (c) tPORt Crew            #
+#######################################
+
+name=UPX v0.89.6 - v1.02 / v1.05 - v1.22 -> Markus & Laszlo
+signature=::::::::::::::::::::::::::::::::::::::::::::::::8A064688074701DB75078B1E83EEFC11DB72EDB801::::::01DB75078B1E83EEFC11DB11C001DB73::75::8B1E83EEFC
+un_name=UPX-Ripper v1.3
+un_url=n/a

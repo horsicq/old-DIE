@@ -1,0 +1,1322 @@
+; include operands.inc
+include Strings.mac
+; include TEB.inc
+
+;-----------------------------------------------
+; DIRECTORIES IN PE FILE
+
+IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT      EQU     13 ;  Delay Load Import Descriptors
+IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR    EQU     14 ;  COM Runtime descriptor
+
+CRLF    EQU 13,10
+
+IMAGE_DIR_EXPORT            EQU   IMAGE_DIRECTORY_ENTRY_EXPORT * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_IMPORT            EQU   IMAGE_DIRECTORY_ENTRY_IMPORT * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_RESOURCE          EQU   IMAGE_DIRECTORY_ENTRY_RESOURCE * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_EXCEPTION         EQU   IMAGE_DIRECTORY_ENTRY_EXCEPTION * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_SECURITY          EQU   IMAGE_DIRECTORY_ENTRY_SECURITY * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_BASERELOC         EQU   IMAGE_DIRECTORY_ENTRY_BASERELOC * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_DEBUG             EQU   IMAGE_DIRECTORY_ENTRY_DEBUG * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_COPYRIGHT         EQU   IMAGE_DIRECTORY_ENTRY_COPYRIGHT * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_GLOBALPTR         EQU   IMAGE_DIRECTORY_ENTRY_GLOBALPTR * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_TLS               EQU   IMAGE_DIRECTORY_ENTRY_TLS * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_LOAD_CONFIG       EQU   IMAGE_DIRECTORY_ENTRY_LOAD_CONFIG * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_BOUND_IMPORT      EQU   IMAGE_DIRECTORY_ENTRY_BOUND_IMPORT * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_IAT               EQU   IMAGE_DIRECTORY_ENTRY_IAT * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_DELAY_IMPORT      EQU   IMAGE_DIRECTORY_ENTRY_DELAY_IMPORT * SIZEOF IMAGE_DATA_DIRECTORY
+IMAGE_DIR_COM_DESCRIPTOR    EQU   IMAGE_DIRECTORY_ENTRY_COM_DESCRIPTOR * SIZEOF IMAGE_DATA_DIRECTORY
+
+;-----------------------------------------------
+; HASH CONST
+
+HASH_KEY            equ 0Dh
+
+;-----------------------------------------------
+; SHORT EQUEL
+
+ofs equ offset
+sof equ sizeof
+bpt equ byte ptr
+dpt equ dword ptr
+wpt equ word ptr
+
+;-----------------------------------------------
+; MACROS
+
+;-----------------------------------------------
+; pushes parametres in stack
+;-----------------------------------------------
+xpush macro p00,p01,p02,p03,p04,p05,p06,p07,p08,p09,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19
+    irp pxx,<p19,p18,p17,p16,p15,p14,p13,p12,p11,p10,p09,p08,p07,p06,p05,p04,p03,p02,p01,p00>
+        ifnb <pxx>
+            pushd  pxx
+        endif
+    endm
+endm
+
+;-----------------------------------------------
+; pupes parametres from stack
+;-----------------------------------------------
+xpop macro p00,p01,p02,p03,p04,p05,p06,p07,p08,p09,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19
+    irp pxx,<p19,p18,p17,p16,p15,p14,p13,p12,p11,p10,p09,p08,p07,p06,p05,p04,p03,p02,p01,p00>
+        ifnb <pxx>
+            pop pxx
+        endif
+    endm
+endm
+
+;----------------------------------------------
+;test flag (use with .IF)
+;----------------------------------------------
+flagset macro arg0:REQ,arg1:REQ
+    EXITM   <arg0 & arg1>
+endm
+
+;----------------------------------------------
+; optimized move
+;----------------------------------------------
+xmov macro Dest,Symbol
+    IF ( (((.TYPE(Dest)) AND (2+8+64)) NE 0) AND (((.TYPE(Symbol)) AND (2+8+64)) NE 0) )
+        push  (Symbol and 0FFh)
+        pop   Dest
+        EXITM
+    ELSEIF (.TYPE(Symbol)) AND 04H
+        IF  ( ((Symbol LT 80H) AND (Symbol GE 0))  OR  ((Symbol GE -80H) AND (Symbol LE 0)) )
+            push  (Symbol)
+            pop   Dest
+        EXITM
+        ENDIF
+    ENDIF
+        mov   Dest,Symbol
+ENDM
+
+; -------------------------------
+; pushes offset of quoted string
+; -------------------------------
+pushz macro arg:VARARG
+local nexti
+    call nexti
+    db arg,00h
+nexti:
+endm
+
+; ----------------------------
+; memory to memory assignment
+; ----------------------------
+m2m MACRO M1, M2
+    push M2
+    pop  M1
+ENDM
+
+; -----------------------------
+; return IMMEDIATE value in eax
+; -----------------------------
+return MACRO var
+    IFNB <var>
+        IF ((.TYPE(var)) EQ (.TYPE(0)))
+            IF var EQ 0
+                xor eax,eax  ;; slightly more efficient for zero
+            ELSEIF var EQ 1
+                xor eax,eax  ;; slightly more efficient for one
+                inc eax
+            ELSEIF var EQ -1
+                xor eax,eax  ;; slightly more efficient for -one
+                dec eax
+            ELSE
+                xmov eax,(var)  ;; place value in eax
+            ENDIF
+        ELSE
+            xmov eax,(var)  ;; place value in eax
+        ENDIF
+    ENDIF
+    ret
+ENDM
+
+; ----------------------------
+; include and includelib
+; ----------------------------
+include_ macro arg
+    include arg.inc
+    includelib arg.lib
+endm
+
+; ----------------------------
+; if (eax == 0) jmp @@
+; ----------------------------
+; IF ZERO
+ifz macro arg
+    test eax,eax
+    jz arg
+endm
+
+; ----------------------------
+; if (eax != 0) jmp @@
+; ----------------------------
+; IF NOT ZERO
+ifnz macro arg
+    test eax,eax
+    jnz arg
+endm
+
+; ----------------------------
+; if (eax == -1) jmp @@
+; ----------------------------
+; IF FALSE (-1)
+iff macro arg:REQ
+    inc eax
+    jz arg
+    dec eax
+endm
+
+; ----------------------------
+; if (eax == 1) jmp @@
+; ----------------------------
+; IF TRUE (1)
+ift macro arg
+    dec eax
+    jz  arg
+    inc eax
+endm
+
+; ----------------------------
+; .if (eax == 1) asm() .endif
+; ----------------------------
+; IF TRUE
+@ift macro arg:vararg
+local nexti
+    dec eax
+    jne nexti
+    inc eax
+    arg
+    nexti:
+    inc eax
+endm
+
+; ----------------------------
+; .if !ZERO? asm() .endif
+; ----------------------------
+; IF FLAG NOT ZERO
+@iffnz macro arg:vararg
+local nexti
+   jz nexti
+   arg
+   nexti:
+endm
+
+; ----------------------------
+; .if ZERO? asm() .endif
+; ----------------------------
+; IF FLAG ZERO
+@iffz macro arg:vararg
+local nexti
+   jnz nexti
+   arg
+   nexti:
+endm
+
+; ----------------------------
+; push named_dword
+; ----------------------------
+push_ MACRO arg
+    db hex_push
+arg dd 0
+ENDM
+
+; ----------------------------
+; mov eax, named_dword
+; ----------------------------
+mov_eax MACRO arg
+    db hex_mov or hex_eax
+    arg dd 0
+ENDM
+
+; ----------------------------
+; mov ebx, named_dword
+; ----------------------------
+mov_ebx MACRO arg
+    db hex_mov or hex_ebx
+    arg dd 0
+ENDM
+
+; ----------------------------
+; mov ecx, named_dword
+; ----------------------------
+mov_ecx MACRO arg
+    db hex_mov or hex_ecx
+    arg dd 0
+ENDM
+
+; ----------------------------
+; mov edx, named_dword
+; ----------------------------
+mov_edx MACRO arg
+    db hex_mov or hex_edx
+    arg dd 0
+ENDM
+
+; ----------------------------
+; mov esi, named_dword
+; ----------------------------
+mov_esi MACRO arg
+    db hex_mov or hex_esi
+    arg dd 0
+ENDM
+
+; ----------------------------
+; mov edi, named_dword
+; ----------------------------
+mov_edi MACRO arg
+    db hex_mov or hex_edi
+    arg dd 0
+ENDM
+
+; ----------------------------
+; move memory to,from,size
+; ----------------------------
+move MACRO arg1,arg2,arg3
+    push    edi
+    push    esi
+    push    ecx
+    mov     edi,arg1
+    mov     esi,arg2
+    mov     ecx,arg3
+    rep     movsb
+    pop     ecx
+    pop     esi
+    pop     edi
+ENDM
+
+; ----------------------------
+; extended analog of addr
+; ----------------------------
+xaddr MACRO arg1,arg2
+    IFNB <arg2>
+        lea   arg1,arg2
+        EXITM <arg1>
+    ELSE
+        lea   eax,arg1
+        EXITM <eax>
+    ENDIF
+ENDM
+
+; ----------------------------
+; standart call
+; ----------------------------
+scall MACRO name:REQ,p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12,p13,p14,p15,p16,p17,p18,p19,p20,p21,p22
+    FOR arg,<p22,p21,p20,p19,p18,p17,p16,p15,p14,p13,p12,p11,p10,p9,p8,p7,p6,p5,p4,p3,p2,p1>
+    IFNB <arg>
+      push arg
+    ENDIF
+    ENDM
+    call name
+ENDM
+
+hash macro arg
+local dwHash, tmpstr, bslash
+    dwHash = 0
+    bslash = 0
+
+    tmpstr SUBSTR <arg>,2,@SizeStr(<arg>) - 2
+
+    % forc x, <tmpstr>
+;         IF bslash
+;             bslash = 0
+;             IF "&x" EQ "\"
+;                 dwHash = (dwHash shr HASH_KEY) or (dwHash shl (32-HASH_KEY))
+;                 dwHash = dwHash + "\"
+;             ENDIF
+;         ELSE
+            IF "&x" EQ "\"
+                bslah = 1
+            ELSE
+                dwHash = (dwHash shr HASH_KEY) or (dwHash shl (32-HASH_KEY))
+                dwHash = dwHash + "&x"
+            ENDIF
+;        ENDIF
+    endm
+
+    exitm <dwHash>
+endm
+
+
+
+; ---------------------
+; For Debug
+; ---------------------
+dbginfo macro arg:VARARG
+	IF DEBUG EQ 1
+		mov dword ptr [esp-4],$TA0(<arg>)
+	ENDIF
+	EXITM <>
+endm
+
+; ------------------------------------------------------------
+; Macro for nesting function calls in other invoke statements
+; ------------------------------------------------------------
+$invoke MACRO parameters:VARARG
+    invoke parameters
+    EXITM <eax>
+ENDM
+func equ FUNC
+
+; -----------------------------------------------------------
+; This macro replaces quoted text with a DATA section OFFSET
+; and returns it in ADDR "name" format. It is used by other
+; macros that handle optional quoted text as a parameter.
+; -----------------------------------------------------------
+reparg MACRO arg
+LOCAL nustr
+    quot SUBSTR <arg>,1,1
+    IFIDN quot,<">            ;; if 1st char = "
+        .data
+            nustr db arg,0        ;; write arg to .DATA section
+        .code
+    EXITM <ADDR nustr>      ;; append name to ADDR operator
+    ELSE
+        EXITM <arg>             ;; else return arg
+    ENDIF
+ENDM
+
+; ------------------------------------
+; HIGH ALIGN
+; ------------------------------------
+hialign MACRO reg, number
+    push ecx
+    mov ecx,number
+    dec ecx
+    add reg,ecx
+    not ecx
+    and reg,ecx
+    pop ecx
+ENDM
+
+; ------------------------------------
+; LOW ALIGN
+; ------------------------------------
+lowalign macro reg, number
+    push ecx
+    mov ecx,number
+    dec ecx
+    not ecx
+    and reg,ecx
+    pop ecx
+ENDM
+
+; -------------------------------------
+; variation returns address in register
+; so it can be assigned to a variable.
+; -------------------------------------
+repargv MACRO arg
+LOCAL nustr
+  quot SUBSTR <arg>,1,1
+  IFIDN quot,<">            ;; if 1st char = "
+    .data
+       nustr db arg,0        ;; write arg to .DATA section
+    .code
+       mov eax, OFFSET nustr
+       EXITM <eax>             ;; return data section offset in eax
+  ELSE
+    mov eax, arg
+    EXITM <eax>             ;; else return arg
+  ENDIF
+ENDM
+
+; -------------------------------------------------------
+; This is a parameter checking macro. It is used to test
+; if a parameter in a macro is a quoted string when a
+; quoted string should not be used as a parameter. If it
+; is a user defined error message is displayed at
+; assembly time so that the error can be fixed.
+; -------------------------------------------------------
+tstarg MACRO arg
+  quot SUBSTR <arg>,1,1
+  IFIDN quot,<">            ;; if 1st char = "
+    % echo arg ** QUOTED TEXT ERROR ** memory address expected
+    .ERR
+  ELSE
+    EXITM <arg>             ;; else return arg
+  ENDIF
+ENDM
+
+; -------------------------------------
+; initialised GLOBAL value of any type
+; -------------------------------------
+GLOBAL MACRO variable:VARARG
+    .data?
+        variable
+    .code
+ENDM
+global equ GLOBAL
+
+; ------------------------------------
+; create a global parametr and get offset it
+; ------------------------------------
+sdd MACRO arg:REQ
+    .data?
+        arg dd ?
+    .code
+    EXITM <offset arg>
+ENDM
+
+; ------------------------------------
+; create a global parametr and set it
+; ------------------------------------
+SET MACRO arg1:REQ,arg2:REQ
+    .data?
+        arg1    dd ?
+    .code
+        mov     arg1,arg2
+ENDM
+set equ SET
+
+; ------------------------------------
+; create a local parametr and set it
+; doesn't work :(
+; ------------------------------------
+; LOCALVAR equ <LOCAL>
+
+; NEWL MACRO arg1:REQ,arg2:REQ
+;     LOCALVAR    arg1 :DWORD
+;     mov         arg1,arg2
+; ENDM
+; newl equ NEWL
+
+; ------------------------------------
+; create a global parametr and set it
+; ------------------------------------
+SETM MACRO arg1:REQ,arg2:REQ
+    .data?
+        arg1    dd ?
+    .code
+        m2m     arg1,arg2
+ENDM
+setm equ SETM
+
+; -----------------------------------
+; smt like mov [[arg1]],eax
+; -----------------------------------
+; mov by mem pointer
+movp MACRO arg1:REQ,arg2:REQ
+    push eax
+    mov eax,arg1
+    m2m dpt [eax],arg2
+    pop eax
+ENDM
+
+; ----------------------------------------------------------------
+; invoke enhancement. Add quoted text support to any procedure
+; or API call by using this macro instead of the standard invoke.
+; LIMITATION : quoted text must be plain text only, no ascii
+; values or macro reserved characters IE <>!() etc ..
+; use SADD() or chr$() for requirements of this type.
+; ----------------------------------------------------------------
+fn MACRO args:VARARG
+      LOCAL cnt
+      cnt = 0
+      arg equ <>
+      FOR var,<args>
+        arg CATSTR arg,<var> ;; get the proc name as 1st arg
+        EXITM
+      ENDM
+      FOR var,<args>
+        IF cnt gt 0
+        arg CATSTR arg,<,reparg(var)> ;; replace quotes and append arg
+        ENDIF
+        cnt = cnt + 1
+      ENDM
+      invoke arg
+    ENDM
+
+; ------------------------------------------------
+; Function return value version of the above macro
+; ------------------------------------------------
+rv MACRO args:VARARG
+LOCAL cnt
+cnt = 0
+arg equ <>
+    FOR var,<args>
+      arg CATSTR arg,<var> ;; get the proc name as 1st arg
+      EXITM
+    ENDM
+    FOR var,<args>
+      IF cnt gt 0
+        arg CATSTR arg,<,reparg(var)> ;; replace quotes and append arg
+      ENDIF
+      cnt = cnt + 1
+    ENDM
+    invoke arg
+    EXITM <eax>
+ENDM
+
+; ----------------------------------------------
+; reverse string like swap('1tset') = 'test1'
+; ----------------------------------------------
+swap macro arg:REQ
+local txt
+txt TEXTEQU <>
+
+    % FORC cha, <arg>
+       txt CATSTR <&cha>,txt
+    endm
+    EXITM <txt>
+endm
+
+
+    ; --------------------------------
+    ; initialise floating point vaues
+    ; --------------------------------
+
+      FLOAT4 MACRO name,value
+        .data
+        align 4
+          name REAL4 value
+        .code
+      ENDM
+
+      FLOAT8 MACRO name,value
+        .data
+        align 4
+          name REAL8 value
+        .code
+      ENDM
+
+      FLOAT10 MACRO name,value
+        .data
+        align 4
+          name REAL10 value
+        .code
+      ENDM
+
+    ; **********************************************************
+    ; function style macros for direct insertion of data types *
+    ; **********************************************************
+
+      FP4 MACRO value
+        LOCAL vname
+        .data
+        align 4
+          vname REAL4 value
+        .code
+        EXITM <vname>
+      ENDM
+
+      FP8 MACRO value
+        LOCAL vname
+        .data
+        align 4
+          vname REAL8 value
+        .code
+        EXITM <vname>
+      ENDM
+
+      FP10 MACRO value
+        LOCAL vname
+        .data
+        align 4
+          vname REAL10 value
+        .code
+        EXITM <vname>
+      ENDM
+
+    ; string address in INVOKE format
+    ; --------------------------------
+      SADD MACRO quoted_text:VARARG
+        EXITM <ADDR TXT(quoted_text)>
+      ENDM
+
+    ; -----------------------------------------------------
+    ; string address embedded directly in the code section
+    ; -----------------------------------------------------
+      CADD MACRO quoted_text:VARARG
+        LOCAL vname,lbl
+          jmp lbl
+            vname db quoted_text,0
+          align 4
+          lbl:
+        EXITM <ADDR vname>
+      ENDM
+
+    ; --------------------------------------------------
+    ; Macro for placing an assembler instruction either
+    ; within another or within a procedure call
+    ; --------------------------------------------------
+
+    ASM MACRO parameter1,source
+      LOCAL mnemonic
+      LOCAL dest
+      LOCAL poz
+
+      % poz INSTR 1,<parameter1>,< >             ;; get the space position
+      mnemonic SUBSTR <parameter1>, 1, poz-1     ;; get the mnemonic
+      dest SUBSTR <parameter1>, poz+1            ;; get the first argument
+
+      mnemonic dest, source
+
+      EXITM <dest>
+    ENDM
+
+       sas MACRO var,quoted_text:VARARG
+        LOCAL txtname
+        .data
+          txtname db quoted_text,0
+          align 4
+        .code
+        mov var, OFFSET txtname
+      ENDM
+
+     ; --------------------------------------------
+    ; FLD does not accept immediate values. These
+    ; macros emulate loading an immediate value by
+    ; loading the value into the .DATA section.
+    ; EXAMPLE : fld8 1234.56789
+    ; --------------------------------------------
+      fld4 MACRO fpvalue
+        LOCAL name
+        .data
+          name REAL4 fpvalue
+          align 4
+        .code
+        fld name
+      ENDM
+
+      fld8 MACRO fpvalue
+        LOCAL name
+        .data
+          name REAL8 fpvalue
+          align 4
+        .code
+        fld name
+      ENDM
+
+      fld10 MACRO fpvalue
+        LOCAL name
+        .data
+          name REAL10 fpvalue
+          align 4
+        .code
+        fld name
+      ENDM
+    ; --------------------------------------------
+
+     ; **********************************
+    ; control flow macro by Greg Falen *
+    ; **********************************
+
+    ; ----------------------
+    ; Switch/Case emulation
+    ; ----------------------
+    $casflg equ <>
+    $casvar equ <>
+    $casstk equ <>
+
+    switch macro _var:req, _reg:=<eax>
+        mov _reg, _var
+        $casstk catstr <_reg>, <#>, $casflg, <#>, $casstk
+        $casvar equ _reg
+        $casflg equ <0>         ;; 0 = emit an .if, 1 an .elseif
+    endm
+
+    case macro _args:vararg     ;; like Pascal: case id1. id4 .. id8, lparam, ...
+                                ;; does an or (case1 || case2 || case3...)
+      $cas textequ <>
+      irp $v, <_args>         ;; for each case
+          t@ instr <$v>, <..> ;; range ?
+          if t@               ;; yes
+              $LB substr <$v>, 1, t@-1                  ;; lbound = left portion
+              $LB catstr <(>, $casvar, <!>=>, $LB, <)>  ;; ($casvar >= lbound)
+              $UB substr <$v>, t@+2                     ;; ubound = right portion
+              $UB catstr <(>, $casvar, <!<=>, $UB, <)>  ;; ($casvar <= ubound)
+              $t catstr <(>, $LB, <&&> , $UB,<)>        ;; (($casvar >= $lb) && ($casvar <= $ub))
+          else    ;; no, it's a value (var/const)
+              $t catstr <(>, $casvar, <==>, <$v>, <)>   ;; ($casvar == value)
+          endif
+          $cas catstr <|| >, $t, $cas                   ;; or this case w/ others
+      endm
+      $cas substr $cas, 3 ;; lose the extra "|| " in front
+        ifidn $casflg, <0> ;; 0 = 1'st case
+            % .if $cas ;; emit ".if"
+        else ;; all others
+            % .elseif $cas ;; emit ".elseif"
+        endif
+        $casflg equ <1> ;; NOT 1'st
+    endm
+
+    default macro _default:vararg
+        .else
+        _default
+    endm
+
+    endsw macro _cmd:vararg
+        ifidn $casstk, <>
+            .err <Endsw w/o Switch>
+        else
+            t@ instr $casstk, <#>
+            $casvar substr $casstk, 1, t@-1
+            $casstk substr $casstk, t@+1
+            t@ instr $casstk, <#>
+            $casflg substr $casstk, 1, t@-1
+            ifidn $casstk, <#>
+                $casstk equ <>
+            else
+                $casstk substr $casstk, t@+1
+            endif
+            .endif
+        endif
+    endm
+
+  ; --------------------------------------------------
+  ; equates for name and case variation in macro names
+  ; --------------------------------------------------
+    Case equ <case>
+    CASE equ <case>
+    Switch equ <switch>
+    SWITCH equ <switch>
+
+    Endsw equ <endsw>
+    EndSw equ <endsw>
+    ENDSW equ <endsw>
+
+    Select equ <switch>
+    ;; select equ <switch>
+    SELECT equ <switch>
+
+    Endsel equ <endsw>
+    endsel equ <endsw>
+    ENDSEL equ <endsw>
+
+    Default equ <default>
+    DEFAULT equ <default>
+
+    CaseElse equ <default>
+    Caseelse equ <default>
+    CASEELSE equ <default>
+    caseelse equ <default>
+
+; лллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+; Macros for storing and retrieving text macros, based on
+; the $casstk code from Greg Falen's Switch/Case macros.
+; лллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    $text_stack$ equ <#>
+
+;    pushtext MACRO name:req
+;        $text_stack$ CATSTR <name>, <#>, $text_stack$
+;    ENDM
+
+    poptext MACRO name:req
+        LOCAL pos
+        pos INSTR $text_stack$, <#>
+        name SUBSTR $text_stack$, 1, pos-1
+        $text_stack$ SUBSTR $text_stack$, pos+1
+    ENDM
+
+
+; лллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+; Macros to implement a string-comparison specific
+; Switch/Case construct. Multiple instances and
+; nesting supported.
+; лллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    $test_val$ equ <>
+    $end_sw$ equ <>
+    $sw_state$ equ <>
+    _sw_cnt_ = 0
+
+    switch$ MACRO lpstring:REQ
+        pushtext $test_val$                 ;; Preserve globals for previous Switch/Case.
+        pushtext $sw_state$
+        pushtext $end_sw$
+
+        $test_val$ equ <lpstring>           ;; Copy string address for this Select/Case
+                                            ;; to global so case$ can access it.
+        $sw_state$ equ <>                   ;; Set state global to starting value.
+        _sw_cnt_ = _sw_cnt_ + 1             ;; Generate a unique exit label for this
+        $end_sw$ CATSTR <end_sw>, %_sw_cnt_ ;; Select/Case and preserve it.
+        pushtext $end_sw$
+    ENDM
+
+    case$ MACRO quoted_text:REQ
+        ;; The case statements will be any statements between the case$ and the following case$,
+        ;; else$, or endsw$.
+        ;;
+        ;; If this is a following case$, emit a jump to the exit label for this Select/Case and
+        ;; terminate the .IF block.
+        ;; --------------------------------
+        IFIDN $sw_state$, <if>
+          poptext $end_sw$                  ;; Because there could have been an intervening
+          pushtext $end_sw$                 ;; Switch/Case we need to recover the correct
+          jmp   $end_sw$                    ;; exit label for this Switch/Case.
+          .ENDIF
+        ENDIF
+        ;; --------------------------------
+        ;; Start a new .IF block and update the state global.
+        .IF FUNC(szCmp, $test_val$, chr$(quoted_text)) != 0
+        $sw_state$ equ <if>
+    ENDM
+
+    else$ MACRO
+        IFIDN $sw_state$, <if>              ;; If following a case$, emit a jump to the exit
+          poptext $end_sw$                  ;; label for this Select/Case and terminate the .IF
+          pushtext $end_sw$                 ;; block. The jump is necessary, whenever the case
+          jmp   $end_sw$                    ;; for the .IF block being terminated is true, to
+          .ENDIF                            ;; bypass the else statements that follow.
+          $sw_state$ equ <>                 ;; The state global must be updated to stop the
+        ENDIF                               ;; endsw$ from terminatinmg the .IF block.
+    ENDM
+
+    endsw$ MACRO
+        IFIDN $sw_state$, <if>              ;; If following a case$, terminate the .IF block.
+          .ENDIF
+        ENDIF
+
+        poptext $end_sw$                    ;; Remove the exit label from the stack.
+
+      $end_sw$:
+
+        poptext $end_sw$                    ;; Recover gobals for previous Switch/Case.
+        poptext $sw_state$
+        poptext $test_val$
+    ENDM
+
+; лллллллллллллллллллллллллллллллллллллллллллллллллллллллллл
+
+    jmp_table MACRO name,args:VARARG
+      .data
+        align 4
+        name dd args
+      .code
+    ENDM
+
+
+      GLOBALS MACRO var1,var2,var3,var4,var5,var6,var7,var8,var9,var0,
+                    varA,varB,varC,varD,varE,varF,varG,varH,varI,varJ
+        .data?
+          align 4
+          var1
+          var2
+          var3
+          var4
+          var5
+          var6
+          var7
+          var8
+          var9
+          var0
+          varA
+          varB
+          varC
+          varD
+          varE
+          varF
+          varG
+          varH
+          varI
+          varJ
+        .code
+      ENDM
+
+    ; -------------------------------
+    ; make 2 WORD values into a DWORD
+    ; result in eax
+    ; -------------------------------
+    MAKEDWORD MACRO LoWord,HiWord
+        mov ax, HiWord
+        ror eax, 16
+        mov ax, LoWord
+    ENDM
+
+    ; -----------------------------
+    ; return IMMEDIATE value in eax
+    ; -----------------------------
+    retval MACRO var
+        IF var EQ 0
+          xor eax, eax  ;; slightly more efficient for zero
+        ELSE
+          mov eax, var  ;; place value in eax
+        ENDIF
+        ret
+    ENDM
+
+    ; -----------------------------------
+    ; INPUT red, green & blue BYTE values
+    ; OUTPUT DWORD COLORREF value in eax
+    ; -----------------------------------
+    RGB MACRO red, green, blue
+    color = 0
+        color = (((blue shl 8) + green) shl 8) + red
+	EXITM <color>
+    ENDM
+
+    ; ------------------------------------------------
+    ; The following macro were written by Ron Thomas
+    ; ------------------------------------------------
+    ; Retrieves the low word from double word argument
+    ; ------------------------------------------------
+    LOWORD MACRO bigword
+        mov  eax,bigword
+        and  eax,0FFFFh     ;; Set to low word
+    ENDM
+
+    ; ----------------------
+    ; fast lodsb replacement
+    ; ----------------------
+    lob MACRO
+        mov al, [esi]
+        inc esi
+    ENDM
+
+    ; ----------------------
+    ; fast stosb replacement
+    ; ----------------------
+    stb MACRO
+        mov [edi], al
+        inc edi
+    ENDM
+
+    ; ----------------------------
+    ; code section text insertion
+    ; ----------------------------
+    szText MACRO Name, Text:VARARG
+    LOCAL lbl
+        jmp lbl
+            Name db Text,0
+        lbl:
+    ENDM
+
+    alloc MACRO bytecount
+        invoke GlobalAlloc,GMEM_FIXED or GMEM_ZEROINIT,bytecount
+        EXITM <eax>
+    ENDM
+
+    free MACRO hmemory
+        invoke GlobalFree,hmemory
+    ENDM
+
+; sSEH STRUCT
+; 	OrgEsp            DD ?
+; 	OrgEbp            DD ?
+; 	SaveEip           DD ?
+; sSEH ENDS
+
+; InstSehFrame MACRO ContinueAddr
+;     assume  fs:nothing
+;     IFNDEF SehStruct
+;         SehStruct equ 1
+;         .data
+;         SEH    sSEH <?>
+;     ENDIF
+; 	.code
+;     mov     SEH.SaveEip,ContinueAddr
+;     mov     SEH.OrgEbp,ebp
+;     push    ofs SehHandler
+; 	push    fs:[0]
+; 	mov     SEH.OrgEsp,esp
+; 	mov     fs:[0],esp
+; 	assume  fs:error
+; ENDM
+
+; KillSehFrame MACRO
+; 	assume  fs:nothing
+; 	pop     fs:[0]
+; 	add     esp,4
+; 	assume  fs:error
+; ENDM
+
+;---------------------------------------------
+; macro for unicode imports
+;---------------------------------------------
+UIMP MACRO arg1,arg2,arg3
+IFDEF UNICODE
+    IFNB <arg3>
+        IF UNICODE NE 0
+            arg1 equ arg3
+        ELSE
+            arg1 equ arg2
+        ENDIF
+    ELSE
+        arg1 equ arg2
+    ENDIF
+ELSE
+    arg1 equ arg2
+ENDIF
+ENDM
+
+; #############################################
+;        UNDOCUMENTED STRUCTURES
+; #############################################
+
+;UNICODE_STRING STRUCT
+;  ULength          USHORT ?
+;  MaximumLength    USHORT ?
+;  Buffer           PWSTR  ?
+;UNICODE_STRING ENDS
+;
+;     CLIENT_ID         STRUCT     ;NTDDK
+;      UniqueProcess    DWORD ?
+;      UniqueThread     DWORD ?
+;     CLIENT_ID         ENDS
+;
+;PEB_MODULE_STARTS STRUCT
+;  cbsize           DWORD ?  ;00  ?? = 24H
+;  sHeap            DWORD ?  ;04  ??
+;  Reserved         DWORD ?  ;08  ??
+;  pFirstModEntry0  DWORD ?  ;0C
+;  pFirstModEntry1  DWORD ?  ;10
+;  pFirstModEntry2  DWORD ?  ;14
+;  pFirstModEntry3  DWORD ?  ;18
+;  pFirstDllEntry   DWORD ?  ;1C
+;  pFirstModEntry4  DWORD ?  ;20
+;PEB_MODULE_STARTS ENDS
+;
+;PEB_MODULE_ENTRY0 STRUCT
+;  pNextModEntry0   DWORD ?  ;00
+;  pNextModEntry1   DWORD ?  ;04
+;  pNextModEntry2   DWORD ?  ;08
+;  pNextModEntry3   DWORD ?  ;0C
+;  pNextDllEntry    DWORD ?  ;10
+;  pNextModEntry4   DWORD ?  ;14
+;  ImageBase        DWORD ?  ;18
+;  ImageEntry       DWORD ?  ;1C
+;  ImageSize        DWORD ?  ;20
+;  ModuleFileName   UNICODE_STRING <>  ;24
+;  ModuleBaseName   UNICODE_STRING <>  ;2C
+;  dwFlags          DWORD ?  ;34
+;  RefCount         WORD  ?  ;38
+;  TlsCallbacks     WORD  ?  ;3A
+;  pTIBarea0        DWORD ?  ;3C
+;  pTIBarea1        DWORD ?  ;40
+;  ImageTimeStamp   DWORD ?  ;44 new in NT4 SPX (X > 0) ???
+;PEB_MODULE_ENTRY0 ENDS
+;;NT4 SP0 size 44H otherwise 48H
+;
+;PEB_DLL_ENTRY STRUCT
+;  pNextDllEntry    DWORD ?  ;00
+;  pNextModEntry4   DWORD ?  ;04
+;  ImageBase        DWORD ?  ;08
+;  ImageEntry       DWORD ?  ;0C
+;  ImageSize        DWORD ?  ;10
+;  ModuleFileName   UNICODE_STRING <>  ;14
+;  ModuleBaseName   UNICODE_STRING <>  ;1C
+;  dwFlags          DWORD ?  ;24
+;  RefCount         WORD ?  ;28
+;  TlsCallbacks     WORD ?  ;2A
+;  pTIBarea0        DWORD ?  ;3C
+;  pTIBarea1        DWORD ?  ;40
+;  ImageTimeStamp   DWORD ?  ;34
+;PEB_DLL_ENTRY ENDS
+;
+;UPDATE_LOAD_COUNT             EQU 00000004H  ;?????
+;LOAD_IN_PROGRESS              EQU 00001000H  ;?????
+;HAS_DLLMAIN_OR_IS_INITIALIZED EQU 00004000H  ;?????
+;ALLOW_DLL_PROCESS_DETACH      EQU 00080000H  ;?????
+;WAS_RELOCATED                 EQU 00200000H  ;?????
+;
+;PEB_LDR_DATA STRUCT   ;EliCZ
+;  cbsize                                  DWORD ?  ;00 == 24H
+;  Flags                                   DWORD ?  ;04
+;  Unknown8                                DWORD ?  ;08
+;  InLoadOrderModuleListHead               DWORD ?  ;0C
+;  PreviousInLoadOrderLdrEntry             DWORD ?  ;10
+;  InMemoryOrderModuleListHead             DWORD ?  ;14
+;  PreviousInMemoryOrderLdrEntry           DWORD ?  ;18
+;  InInitializationOrderModuleListHead     DWORD ?  ;1C
+;  PreviousInInitializationOrderLdrEntry   DWORD ?  ;20
+;PEB_LDR_DATA ENDS                                  ;size 24H
+;
+;;Flags:
+;      LDRP_STATIC_LINK              = 00000002H
+;      LDRP_IMAGE_DLL                = 00000004H
+;      LDRP_LOAD_IN_PROGRESS         = 00001000H
+;      LDRP_UNLOAD_IN_PROGRESS       = 00002000H
+;      LDRP_ENTRY_PROCESSED          = 00004000H
+;      LDRP_ENTRY_INSERTED           = 00008000H
+;      LDRP_CURRENT_LOAD             = 00010000H
+;      LDRP_FAILED_BUILTIN_LOAD      = 00020000H
+;      LDRP_DONT_CALL_FOR_THREADS    = 00040000H
+;      LDRP_PROCESS_ATTACH_CALLED    = 00080000H
+;      LDRP_DEBUG_SYMBOLS_LOADED     = 00100000H
+;      LDRP_IMAGE_NOT_AT_BASE        = 00200000H
+;      LDRP_WX86_IGNORE_MACHINETYPE  = 00400000H
+;
+;LDR_ENTRY STRUCT   ;EliCZ
+;      NextInLoadOrderLdrEntry                DWORD ?  ;00
+;      PreviousInLoadOrderLdrEntry            DWORD ?  ;04
+;      NextInMemoryOrderLdrEntry              DWORD ?  ;08
+;      PreviousInMemoryOrderLdrEntry          DWORD ?  ;0C
+;      NextInInitializationOrderLdrEntry      DWORD ?  ;10
+;      PreviousInInitializationOrderLdrEntry  DWORD ?  ;14
+;      ModuleBase                             DWORD ?  ;18
+;      EntryPoint                             DWORD ?  ;1C
+;      ModuleSize                             DWORD ?  ;20
+;      ModuleFileName                         UNICODE_STRING <>  ;24
+;      ModuleBaseName                         UNICODE_STRING <>  ;2C
+;      Flags                                  DWORD ?  ;34
+;      LoadCount                               WORD ?  ;38
+;      TlsIndex                                WORD ?  ;3A
+;      LdrpHashTableEntry0                    DWORD ?  ;3C
+;      LdrpHashTableEntry1                    DWORD ?  ;40
+;      TimeStamp                              DWORD ?  ;44
+;LDR_ENTRY ENDS                                        ;size 48H
+;
+;   ;dwFlags:
+;      INHERITED_ADDRESS_SPACE       = 00000001H
+;      READ_IMAGEFILE_EXEC_OPTIONS   = 00000100H
+;      BEING_DEBUGGED                = 00010000H
+;
+;     PEB                            STRUCT   ;EliCZ
+;      dwFlags                       DWORD ?  ;00
+;      Unknown04                     DWORD ?  ;04  == -1
+;      ImageBaseAddress              DWORD ?  ;08
+;      PebLdrData                    DWORD ?  ;0C  == *PEB_LDR_DATA
+;      ProcessParameters             DWORD ?  ;10  == *PROCESS_PARAMETERS
+;      SubSystemData                 DWORD ?  ;14  == 0
+;      ProgramHeap                   DWORD ?  ;18
+;      LockingContext                DWORD ?  ;1C  == FastPebLock
+;      LockRoutine                   DWORD ?  ;20  == RtlEnterCriticalSection
+;      UnlockRoutine                 DWORD ?  ;24  == RtlLeaveCriticalSection
+;      DirChange                     DWORD ?  ;28  == 1
+;      Unknown2C                     DWORD ?  ;2C  == apfnDispatch
+;      Unknown30                     DWORD ?  ;30  == 0
+;      Unknown34                     DWORD ?  ;34  == 0
+;      Unknown38                     DWORD ?  ;38  == 0
+;      Unknown3C                     DWORD ?  ;3C  == 0
+;      Unknown40                     DWORD ?  ;40  == TlsBitMap
+;      Unknown44                     DWORD ?  ;44  == 3FH
+;      Unknown48                     DWORD ?  ;48  == 0
+;      ProgramHeap02                 DWORD ?  ;4C
+;      ProgramHeap02a                DWORD ?  ;50
+;      InProgramHeap02               DWORD ?  ;54
+;      AnsiCodePage                  DWORD ?  ;58
+;      OemCodePage                   DWORD ?  ;5C
+;      UnicodeCodePage               DWORD ?  ;60
+;      NumberProcessors              DWORD ?  ;64
+;      GlobalFlag                    DWORD ?  ;68
+;      Unknown6C                     DWORD ?  ;6C  == 0
+;      CritSectTimeout               DWORD ?  ;70
+;      Unknown74                     DWORD ?  ;74
+;      HeapSegmentReserve            DWORD ?  ;78
+;      HeapSegementCommit            DWORD ?  ;7C
+;      HeapDeCommitTotalFreeTreshold DWORD ?  ;80  == 10000H
+;      HeapDeCommitFreeBlockTreshold DWORD ?  ;84  == 1000H
+;      Unknown88                     DWORD ?  ;88
+;      Unknown8C                     DWORD ?  ;8C  == 386H
+;      Unknown90                     DWORD ?  ;90  == RtlpProcessHeapsListBuffer
+;      Unknown94                     DWORD ?  ;94
+;      Unknown98                     DWORD ?  ;98  == 0
+;      Unknown9C                     DWORD ?  ;9C  == 14H
+;      UnknownA0                     DWORD ?  ;A0  == LoaderLock
+;      dwMajorVersion                DWORD ?  ;A4
+;      dwMinorVersion                DWORD ?  ;A8
+;      dwBuildNumber                  WORD ?  ;AC
+;      CSDVersion                     WORD ?  ;AE
+;      dwPlatformId                  DWORD ?  ;B0
+;      Subsystem                     DWORD ?  ;B4
+;      MajorSusbsytemVersion         DWORD ?  ;B8
+;      MinorSusbsytemVersion         DWORD ?  ;BC
+;      ProcessAffinityMask           DWORD ?  ;C0
+;      UnknownC4                     DWORD  044H DUP (?) ;C4
+;      SessionId                     DWORD ?  ;1D4
+;      Unknown1D8                    DWORD ?  ;1D8
+;      Unknown1DC                    DWORD ?  ;1DC
+;      Unknown1E0                    DWORD ?  ;1E0
+;      Unknown1E4                    DWORD ?  ;1E4
+;     PEB                            ENDS     ;size 1E8H,  NT4 size 150H
+;;-----------------------------------------
+;     TEB                   STRUCT             ;NTDDK + EliCZ
+;      ExceptionList        DWORD ?            ;00
+;      StackBase            DWORD ?            ;04
+;      StackLimit           DWORD ?            ;08
+;      SubSystemTib         DWORD ?            ;0C
+;      UNION
+;       FiberData           DWORD ?            ;10
+;       Version             DWORD ?            ;10
+;      ENDS
+;      ArbitraryUserPointer DWORD ?            ;14
+;      Self                 DWORD ?            ;18
+;      EnvironmentPtr       DWORD ?            ;1C
+;      ClientId             CLIENT_ID <>       ;20
+;      RpcHandle            DWORD ?            ;28
+;      TlsStorage           DWORD ?            ;2C
+;      pPEB                 DWORD ?            ;30
+;      LastErrorValue       DWORD ?            ;34  Get/SetLastError
+;      OwnedLocksCount      DWORD ?            ;38  aka CountOfOwnedCriticalSections
+;      Unknown3C            DWORD ?            ;3C
+;      Win32ThreadInfo      DWORD ?            ;40
+;      Unknown44            DWORD 020H DUP (?) ;44
+;      Locale               DWORD ?            ;C4
+;      UnknownC8            DWORD 17BH DUP (?) ;C8
+;      RealClientId         CLIENT_ID <>       ;6B4
+;      Unknown6BC           DWORD ?            ;6BC
+;      GdiClientId          CLIENT_ID <>       ;6C0
+;      GdiThreadLocalInfo   DWORD ?            ;6C8
+;      Win32ClientInfo      DWORD ?            ;6CC  probably array
+;      Unknown6D0           DWORD 149H DUP (?) ;6D0
+;      LastStatusValue      DWORD ?            ;BF4
+;      WindowStation        UNICODE_STRING <>  ;BF8
+;      UnknownC00           DWORD 083H DUP (?) ;C00
+;      ThreadStack          DWORD ?            ;E0C
+;      UnknownE10           DWORD 043H DUP (?) ;E10
+;      RpcTls               DWORD ?            ;F1C  ptr to RPC_TLS
+;      UnknownF20           DWORD ?            ;F20
+;      UnknownF24           DWORD ?            ;F24
+;      HardErrorsMode       DWORD ?            ;F28
+;      UnknownF2C           DWORD 01BH DUP (?) ;F2C
+;      LogonLocale          DWORD ?            ;F98
+;      LogonLocale2         DWORD ?            ;F9C
+;      UnknownFA0           DWORD ?            ;FA0
+;     TEB                   ENDS               ;size FA4H,  NT4 size F88H
+;;-----------------------------------------
+;    ;Shared area in UM at 7FFE0000H, in KM at FFDF0000H
+;    ;of course read-only
+;     UP_KUSER_SHARED_DATA     = 7FFE0000H
+;     KUSER_SHARED_DATA        STRUCT             ;EliCZ
+;      TickCount               DWORD ?            ;00
+;      TickCountMultiplier     DWORD ?            ;04 ??
+;      ElapsedTime             QWORD ?            ;08
+;      ElapsedTimeCompareHigh  DWORD ?            ;10
+;      SystemTime              QWORD ?            ;14  LocalTime = SystemTime - TimeZoneBias
+;      SystemTimeCompareHigh   DWORD ?            ;1C
+;      TimeZoneBias            QWORD ?            ;20
+;      TimeZoneBiasCompareHigh DWORD ?            ;28
+;      ImageNumberLow           WORD ?            ;2C
+;      ImageNumberHigh          WORD ?            ;2E
+;      SystemRoot              WCHAR MAX_PATH DUP (?) ;30
+;      Unknown238              DWORD ?            ;238
+;      CryptoExponent          DWORD ?            ;23C
+;      TimeZoneId              DWORD ?            ;240
+;      Unknown244              DWORD 25H DUP (?)  ;244
+;     KUSER_SHARED_DATA        ENDS               ;size 2D8
+;;-----------------------------------------
+;     RPC_TLS               STRUCT             ;EliCZ
+;      fAsync               DWORD ?            ;00
+;      HandleToThread       DWORD ?            ;04
+;      HandleToThreadEvent  DWORD ?            ;08
+;      Context              DWORD ?            ;0C
+;      SecurityContext      DWORD ?            ;10
+;      BufferCacheArray     DWORD 008H DUP (?) ;14
+;      CancelTimeout        DWORD ?            ;34
+;      fCallCanceled        DWORD ?            ;38
+;      Unknown3C            DWORD ?            ;3C
+;      ExtendedStatus       DWORD ?            ;40
+;      SavedProcedure       DWORD ?            ;44
+;      SavedParameter       DWORD ?            ;48
+;      ActiveCall           DWORD ?            ;4C
+;      Unknown50            DWORD 004H DUP (?) ;50
+;     RPC_TLS               ENDS               ;size 60H
+;;-----------------------------------------
+;ICMP_ECHO equ 8
+
+;--------------------------------------------------;
+
+PUSHADS struct
+    regEdi                  dd ?    ; esp+00
+    regEsi                  dd ?    ; esp+04
+    regEbp                  dd ?    ; esp+08
+    regEsp                  dd ?    ; esp+0C
+    regEbx                  dd ?    ; esp+10
+    regEdx                  dd ?    ; esp+14
+    regEcx                  dd ?    ; esp+18
+    regEax                  dd ?    ; esp+1C
+PUSHADS ends
+
+;--------------------------------------------------;

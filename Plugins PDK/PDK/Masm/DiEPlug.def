@@ -1,0 +1,5 @@
+LIBRARY DiEPlug
+EXPORTS DiePlugName
+EXPORTS DiePlugProc
+EXPORTS DiePlugHwnd
+EXPORTS DiePlugPe

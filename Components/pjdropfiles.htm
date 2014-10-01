@@ -1,0 +1,385 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2//EN">
+
+<html>
+
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+	<title>DelphiDabbler Info Sheet: Drop Files Components</title>
+	<base target="_blank">
+	<style>
+		<!--
+			body {
+				background-color: White;
+				font-family: Verdana, Geneva, Arial, Helvetica, sans-serif;
+				font-size: 10pt;
+			}
+			h1 {font-size: 14pt;}
+			h2 {font-size: 12pt;}
+			h3 {font-size: 10pt;}
+			h4 {font-size: 10pt; font-style: italic;}
+			li.spaced {margin-top: 6px;}
+		-->
+	</style>
+</head>
+
+<body>
+<h1>Drop Files Components</h1>
+
+<hr noshade>
+
+
+<!-- ---- CONTENTS ---- -->
+
+<h2>Contents</h2>
+
+<ul>
+  <li><a href="#Description" target="_self">Description</a></li>
+  <li><a href="#Compatibility" target="_self">Compatibility</a></li>
+  <li><a href="#Installation" target="_self">Installation</a></li>
+  <li><a href="#Issues" target="_self">Known Issues</a></li>
+  <li><a href="#Update" target="_self">Update History</a></li>
+  <li><a href="#License" target="_self">License and Disclaimer</a></li>
+  <li><a href="#Author" target="_self">About the Author</a></li>
+</ul>
+
+<hr noshade>
+
+
+<!-- ---- DESCRIPTION ---- -->
+
+<h2><a name="Description"></a>Description</h2>
+
+<p>This unit provides two components that can handle files dragged and dropped 
+	from Windows Explorer, along with two additional helper components that can
+	optionally be used to filter the files dropped:</p>
+
+<h3>TPJDropFiles</h3>
+<p><em>TPJDropFiles</em> provides a window which can accept files dragged and 
+	dropped from Windows Explorer. The window takes on the appearance of its parent 
+	window, although anything drawn on the parent's canvas is obliterated.</p>
+<p>The control can contain child components (in a similar way to <em>TPanel</em> 
+	components). Files dropped over any such child component are accepted by the 
+	parent <em>TPJDropFiles</em> component. The <em>TPJDropFiles</em> component 
+	can be aligned with the form on which it is placed using the <em>Align</em> 
+	property.</p>
+<p>When files are dropped over this component the <em>OnBeforeDrop</em> event 
+	is first triggered. The dropped files are then processed and dropped folders 
+	and optionally recursed. Files and folders can be filtered using either by
+	handling the <em>OnFileFilter</em> event or by using the component in association
+	with one of special &quot;filter&quot; components (see below). Once the
+	files have been processed and filtered the <em>OnDropFiles</em> 
+	event is triggered. The names of the files are recorded in the <em>Files</em> 
+	property and the number of files is held in the <em>Count</em> property.</p>
+<p>The point at which the files were dropped is given by the <em>DropPoint</em> 
+	property (in coordinates relative to the control). The <em>DropControl</em> 
+	property identifies any child control that was under the mouse cursor when the 
+	files were dropped.</p>
+<p>The window containing the control can optionally be given the focus when files 
+	are dropped.</p>
+
+<h3>TPJFormDropFiles</h3>
+<p><em>TPJFormDropFiles</em> is a non-visual component that enables the form where 
+	it is dropped to accept files dragged and dropped from Explorer. Whenever files 
+	are dropped anywhere on the form's window, the <em>OnDropFiles</em> event is 
+	triggered.</p>
+<p>As with <em>TPJDropFiles</em> files can be filtered and the number and names
+	of dropped files, the drop coordinates and any control under the mouse
+	cursor can be found.</p>
+
+<h3>The Filters</h3>
+<p>There are two filter components provided that can be used with either of the
+	above components. They are:</p>
+<ul>
+	<li><em>TPJExtFileFilter</em> - filters files and/or folders
+		according to their file extension.</li>
+	<li><em>TPJWildCardFileFilter</em> - filters file and folders using DOS-like
+		wild cards, using the * and ? wild card characters.</li>
+</ul>
+
+<h3>Component and Property Editors</h3>
+<p>A simple component editor is provided that makes the OnDropFiles event the default
+	that is created when the two main components are double clicked.</p>
+<p><em>TPJExtFileFilter</em> has a property editor dialog that makes it easy to enter
+	the filtered file extensions.</p>
+
+
+<hr noshade>
+
+
+<!-- ---- COMPATIBILITY ---- -->
+
+<h2><a name="Compatibility"></a>Compatibility</h2>
+
+<p>This component is compatible with Delphi 3 to 7 and has been tested with all
+	but v5.</p>
+
+
+<hr noshade>
+
+
+<!-- ---- INSTALLATION ---- -->
+
+<h2><a name="Installation"></a>Installation</h2>
+
+<h3>Installation with Delphi 3 to 7</h3>
+
+<p>In these instructions <code><strong>$(DELPHI)</strong></code> is to be taken
+	to represent the path where the appropriate version of Delphi was
+	installed.</p>
+
+<ol>
+	<li class="spaced">Unzip the downloaded zip file into a folder of your
+		choice, preserving the directory structure.</li>
+	<li class="spaced">Copy the files <code>PJDropFiles.pas</code>,
+		<code>PJDropFiles.dcr</code>, <code>PJDropFilesDsgn.pas</code> 
+		and <code>PJDropFilesDsgn.dfm</code> to where you wish to install
+		into Delphi.
+		This will probably be a sub-folder of the <code>$(DELPHI)\lib</code>
+		folder.</li>
+	<li class="spaced">Install the unit's components into the palette by
+		choosing the <em>Component | Install Component</em> menu option to
+		display the <em>Install Component</em> dialog box. Then:
+		<ul>
+			<li class="spaced">Select the <em>Into existing package</em>
+				tab.</li>
+			<li>Click the <em>Browse</em> button next to the <em>Unit file
+				name</em> edit box to display the <em>Unit file name</em>
+				dialog box.</li>
+			<li>Select <code>PJDropFiles.pas</code> and
+				<code>PJDropFilesDsgn.pas</code> from the file dialog and
+				click <em>OK</em> to return to the <em>Install Component</em>
+				dialog box.</li>
+			<li>Choose the package into which you wish to install from the
+				<em>Package file name</em> drop down list.</li>
+			<li>Click <em>OK</em>.</li>
+			<li>A confirmation dialog box may be displayed, querying whether
+				it is OK to rebuild and reinstall the package. Click
+				<em>Yes</em> to proceed.</li>
+			<li>The package will now be built and a dialog box will be
+				displayed stating that the <em>TPJDropFiles</em>,
+				<em>TPJFormDropFiles</em>, <em>TPJExtFileFilter</em> and
+				<em>TPJWidlCardFileFilter</em> components have been installed.
+				Click <em>OK</em> to dismiss the dialog box.</li>
+			<li>The components will now appear on the &quot;DelphiDabbler&quot; 
+				palette.</li>
+		</ul>
+	</li>
+	<li class="spaced">If you wish you can delete <code>PJDropFiles.pas</code>
+		and <code>PJDropFilesDgsn.pas</code>
+		from the place where you copied them (but ensure that the
+		<code>.dcu</code>, <code>.dcr</code> and <code>.dfm</code> files are
+		not deleted).</li>
+	<li class="spaced">The simplest way to install the help file is to use my
+		<em><a href="http://www.delphidabbler.com/software.php?id=chi">Component Help Installer
+		Expert</a></em>. If you prefer to install manually, 
+		<a href="http://www.delphidabbler.com/articles.php?article=15">this article</a>
+		explains the process.</li>
+	<li class="spaced">The supplied demo programs can be loaded into Delphi
+		and compiled and run as required.</li>
+</ol>
+
+<hr noshade>
+
+
+<!-- ---- KNOWN ISSUES ---- -->
+
+<h2><a name="Issues"></a>Known Issues</h2>
+
+<p>There was a bug in release 2.0 where length of strings containing names of 
+	dropped files was being set incorrectly. This was fixed from release 2.0.1.</p>
+
+<p>In v3.0 and v3.1 the DropControl property did not always return the correct control -
+	this was been fixed in v3.2</p>
+	
+<p>There was a small memory leak in all release 3 versions. This has been fixed
+	in release 4.0</p>
+
+<hr noshade>
+
+
+<!-- ---- UPDATE HISTORY ---- -->
+
+<h2><a name="Update"></a>Update History</h2>
+
+<p><strong>Release 4.1.1 of 02 October 2004</strong><br>
+	<em>PJDropFiles v4.1.1 of 02 October 2004</em> 
+<ul>
+	<li>Refactored the component editor, TPJDropFilesCE. Now has a
+		much simpler implementation.</li>
+</ul>
+
+<p><strong>Release 4.1 of 27 September 2004</strong><br>
+	<em>PJDropFiles v4.1 of 27 September 2004</em> 
+<ul>
+	<li>Added new property editor for TPJExtFileFilter's
+		Extensions property that displays dialog to assist in
+		building the extension string.</li>
+	<li>Added component editor for TPJFormDropFiles and
+		TPJDropFiles that creates a OnDropFiles event when the
+		component is double clicked rather than the previous
+		default OnBeforeDrop event handler.</li>
+	<li>Switched off DelphiDabbler extended string property
+		editor (if present) for TPJWildCardFileFilter's
+		Wildcard property.</li>
+	<li>Removed component registration code from PJDropFiles
+		unit to new PJDropFilesDsgn unit.</li>
+	<li>Added new design unit to hold above.</li>
+	<li>Updated help file re new property editor.</li>
+</ul>
+
+<p><strong>Release 4.0 of 12 Apr 2004</strong><br>
+	<em>PJDropFiles v4.0 of 12 Apr 2004</em> 
+<ul>
+	<li>Added ability to filter files dropped on the controls, either via the
+		new OnFileFilter event or by using a separate file filter component.
+		</li>
+	<li>Added abstract base class for new file filter components.</li>
+	<li>Added filter component that filters on file extensions.</li>
+	<li>Added filter component that filters file names on wildcards.</li>
+	<li>Fixed a memory leak in TPJAbstractDropFilesHelper.Destroy.</li>
+	<li>Created component glyphs for new filter components.</li>
+	<li>Updated help file.</li>
+</ul>
+
+<p><strong>Release 3.2 of 09 Feb 2004</strong><br>
+	<em>PJDropFiles v3.2 of 09 Feb 2004</em> 
+<ul>
+	<li>Fixed bug in code that determines control under drop point that was often
+		returning the parent of the actual control under the cursor.</li>
+	<li>Corrected errors and typos in help file.</li>
+	<li>Changed to Mozilla public license.</li>
+</ul>
+
+<p><strong>Release 3.1 of 29 Jul 2003</strong><br>
+	<em>PJDropFiles v3.1 of 29 Jul 2003</em> 
+<ul>
+	<li>Prevented compiler warnings when compiling the component under Delphi 6 
+		and 7.</li>
+	<li>Updated copyright information in help file.</li>
+</ul>
+
+<p><strong>Release 3.0 of 27 Oct 2002</strong><br>
+	<em>PJDropFiles v3.0 of 27 Oct 2002</em> </p>
+<ul>
+	<li>Major update (backwards compatible with v2)</li>
+	<li>Added new Options property to determine how dropped files are handled. Options 
+    are: 
+		<ul>
+			<li>to include or exclude folders from list</li>
+			<li>to include or exclude ordinary files from list</li>
+			<li>to add files and/or folders contained in dropped folders and their
+				subfolders.</li>
+		</ul>
+	</li>
+	<li>Added new OnBeforeDrop event that is triggered before dropped files are 
+		processed.</li>
+	<li>Added new IsFolder array property that informs if a dropped file is a file 
+		or folder.</li>
+	<li>Fixed a bug in TPJFormDropFiles that was causing program to halt on
+		exceptions.</li>
+</ul>
+
+<p><strong>Release 2.0.1 of 13 May 2001</strong><br>
+	<em>PJDropFiles v2.0.1 of 13 May 2001</em> 
+<ul>
+	<li>Fixed minor bug where strings holding names of dropped files had incorrect 
+		length set.</li> 
+</ul>
+
+<p><strong>Release 2.0 of 29 Apr 2001</strong><br>
+	<em>PJDropFiles v2.0 of 29 Apr 2001</em> 
+<ul>
+	<li>Completely rewrote TPJDropFiles component and added FileName, PassThrough 
+		and ForegroundOnDrop properties.</li> 
+	<li>Added new TPJFormDropFiles component.</li> 
+	<li>Changed OnDropFiles events so no longer provided drop coordinates: use DropPoint 
+		properties instead.</li>
+	<li>Rewrote help file for OpenHelp compatibility.</li> 
+	<li>Broke backwards compatibility with Delph 1.</li> 
+	<li>Changed unit name from DrpFiles to PJDropFiles.</li> 
+</ul>
+
+<p><strong>Release 1.1.1a of 28 Nov 1999</strong><br>
+	<em>DrpFiles v1.1.1 of 09 Apr 1999</em></p>
+<ul>
+	<li>Updated HTML documentation to include installation notes for Delphi 3/4
+	and added update history.</li>
+</ul>
+
+<p><strong>Release 1.1.1 of 10 Jul 1999</strong><br>
+	<em>DrpFiles v1.1.1 of 09 Jul 1999</em></p>
+<ul>
+	<li>Changed installation palette from "Own" to "PJ Stuff".</li>
+	<li>Added HTML documentation.</li>
+</ul>
+
+<p><strong>Un-released</strong><br>
+	<em>DrpFiles v1.1 of 22 Oct 1998</em></p>
+<ul>
+	<li>Changed 2nd parameter to DragQueryFile when used to find number of files
+		dropped from $FFFF to Cardinal(-1) to make it portable across 16 and 32
+		bit platforms. This was needed to allow the component to compile under
+		Delphi 2.</li>
+</ul>
+
+<p><strong>Un-released</strong><br>
+	<em>DrpFiles v1.0 of 15 May 1998</em></p>
+<ul>
+	<li>Original version - 16 bit only.</li>
+</ul>
+
+<hr noshade>
+
+
+<!-- ---- LICENSE ---- -->
+
+<h2><a name="License"></a>License &amp; Disclaimer</h2>
+
+<p>This component is copyright &copy; P.D.Johnson, 1998-2004. It is released under
+	the Mozilla Public License:</p>
+
+<blockquote>
+
+	<p><code>Version: MPL 1.1</code></p>
+
+	<p><code>The contents of this file are subject to the Mozilla Public License
+		Version 1.1 (the "License"); you may not use this file except in
+		compliance with the License. You may obtain a copy of the License at
+		<a href="http://www.mozilla.org/MPL/"
+		target="_blank">http://www.mozilla.org/MPL/</a>.</code></p>
+
+	<p><code>Software distributed under the License is distributed on an "AS IS"
+		basis, WITHOUT WARRANTY OF ANY KIND, either express or implied. See the
+		License for the specific language governing rights and limitations under
+		the License.</code></p>
+
+	<p><code>The Original Code is Drop Files Components.</code></p>
+
+	<p><code>The Initial Developer of the Original Code is Peter Johnson
+		(<a href="http://www.delphidabbler.com/"
+		target="_blank">http://www.delphidabbler.com/</a>).</code></p>
+
+	<p><code>Portions created by the Initial Developer are Copyright &copy;
+
+		1998-2003 Peter Johnson. All Rights Reserved.</code></p>
+
+	<p><code>Contributor(s):</code></p>
+
+</blockquote>
+
+<hr noshade>
+
+
+<!-- ---- ABOUT THE AUTHOR ---- -->
+
+<h2><a name="Author"></a>About the Author</h2>
+
+<p>I'm Peter Johnson - a hobbyist programmer living in Ceredigion in West Wales, 
+	UK. I write mainly in Delphi. My programs are available for download on my web-site: 
+	<a href="http://www.delphidabbler.com/">http://www.delphidabbler.com/</a>.</p>
+
+<p>I can be contacted <a href="http://www.delphidabbler.com/contact.php">via the 
+	website</a>.
+</body>
+
+</html>

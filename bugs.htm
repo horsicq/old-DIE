@@ -1,0 +1,245 @@
+<style>
+/* GeSHi (c) Nigel McNie 2004 (http://qbnz.com/highlighter) */
+.php .de1, .php .de2 {font-family: 'Courier New', Courier, monospace; font-weight: normal;}
+.php  {font-family: monospace;}
+.php a:hover {color:#ff0000;}
+.php .imp {font-weight: bold; color: red;}
+.php li {background: #ffffff;}
+.php li.li2 {background: #f4f4f4;}
+.php .kw1 {color: ##000088;color:#000088;}
+.php .kw2 {color: ##000088;color:#000088; font-weight: normal;}
+.php .kw3 {color: ##000088;color:black; font-weight: normal;}
+.php .co1 {color: #008800;color: #008800;}
+.php .co2 {color: #808080; }
+.php .coMULTI {color: #008800;}
+.php .es0 {color: #000099;}
+.php .br0 {color:#ff0000;}
+.php .st0 {color: #008888;color:#008888;}
+.php .nu0 {color: #cc66cc;}
+.php .me1 {color: #006600;}
+.php .me2 {color: #006600;}
+.php .re0 {color: #000088;}
+
+</style><html><head>
+ <meta http-equiv="Content-Type" content="text/html; charset=windows-1251">
+ <meta http-equiv="Content-Language" content="ru">
+ <META HTTP-EQUIV="CACHE-CONTROL" CONTENT="NO-CACHE">
+ <META HTTP-EQUIV="PRAGMA" CONTENT="NO-CACHE">
+ <title>CodeSaver - save your code!</title>
+ <style>
+ a	{ font-family: Verdana; font-size: 10pt; text-decoration: none }
+ a:hover	{ text-decoration: underline }
+ a.nav	{ font-family: Verdana; font-size: 10pt; text-decoration: none; color:#FFFFFF}
+ a.nav:hover	{ text-decoration: underline; color:#FFFFFF}
+ td	{ font-family: Verdana; font-size: 10pt; border-bottom:0px none; }
+ input { width: 200; border-style: solid; border-color: #EFEFEF; background-color: #FFFFFF; }
+ textarea { font-family: Verdana; font-size: 10pt; border-style: solid; border-color: #EFEFEF; width: 510; height: 100 }
+ </style>
+ <base target=_self></head>
+ <noscript><body>
+<script language="javascript" type="text/javascript">
+<!--
+    var RndNum4NoCash = Math.round(Math.random() * 1000000000);
+    document.write('<sc' + 'ript language="JavaScript" type="text/javascript" src="http://ad.adriver.ru/cgi-bin/erle.cgi?sid=73289&amp;target=top&amp;bt=16&amp;pz=0&amp;rnd=' + RndNum4NoCash + '"><\/sc' + 'ript>');
+//-->
+</script>
+<span style="display:none;"><script type="text/javascript" src="http://www.jino-net.ru/adv/begun.js"></script></span>
+<script type="text/javascript" src="http://www.jino-net.ru/adv/itnews.js"></script>
+<script type="text/javascript" src="http://www.jino-net.ru/adv/popup.js"></script>
+<script src="http://www.google-analytics.com/urchin.js" type="text/javascript">
+</script>
+<script type="text/javascript">
+_uacct = "UA-1275823-1";
+urchinTracker();
+</script>
+</noscript>
+ <noscript><body topmargin=0 leftmargin=0></noscript><center>
+ <table border=0 cellspacing=0 cellpadding=0 width=600>
+ <tr><td height=10><tr><td bgcolor=#808080 width="600"><b><font color="#FFFFFF">CodeSaver - <a href="javascript:post('1');" class="nav">add</a> :: <a href="./help.html" class="nav">info</a></font></b><tr><td bgcolor=#EAEAEA>toHells :: 30.05.07 08:58 (2 hours 18 minutes 52 seconds  ago)
+ <tr><td><br><div class="php" style="font-family: monospace;"><ol><li class="li1"><div class="de1">Советую сделать:</div></li>
+<li class="li2"><div class="de2">&nbsp;</div></li>
+<li class="li1"><div class="de1"><span class="nu0">1</span>. Мультиселект во вкладке Sections <span class="br0">&#40;</span>для копирования<span class="br0">&#41;</span></div></li>
+<li class="li2"><div class="de2">&nbsp;</div></li>
+<li class="li1"><div class="de1"><span class="nu0">2</span>. Мультиселект во вкладке DisAsm <span class="br0">&#40;</span>для копирования<span class="br0">&#41;</span></div></li>
+<li class="li2"><div class="de2">&nbsp;</div></li>
+<li class="li1"><div class="de1"><span class="nu0">3</span>. Непонятно нахрена юзать компонент для перехода по ссылке, при нажатии на label</div></li>
+<li class="li2"><div class="de2">Можно вот так сделать:</div></li>
+<li class="li1"><div class="de1">procedure URLink<span class="br0">&#40;</span>URL:PChar<span class="br0">&#41;</span>;</div></li>
+<li class="li2"><div class="de2">begin</div></li>
+<li class="li1"><div class="de1">&nbsp; &nbsp; &nbsp; &nbsp; ShellExecute<span class="br0">&#40;</span><span class="nu0">0</span>, nil, URL, nil, nil, SW_NORMAL<span class="br0">&#41;</span>;</div></li>
+<li class="li2"><div class="de2"><a href="http://www.php.net/end"><span class="kw3">end</span></a>;</div></li>
+<li class="li1"><div class="de1">и вызываем:</div></li>
+<li class="li2"><div class="de2">&nbsp; &nbsp; &nbsp; &nbsp; URLink<span class="br0">&#40;</span>PChar<span class="br0">&#40;</span><span class="st0">'mailto:<span class="es0">'</span>+Label1.Caption));</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; URLink(PChar(<span class="es0">'</span>http://<span class="es0">'</span>+Label2.Caption));</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">Все эти компоненты, сторонних разработчиков, только делают прогу тольще, как тебе известно.</span></div></li>
+<li class="li1"></li>
+<li class="li2"><div class="de2"><span class="st0">4. Drag and Drop тоже можно легко реализовать без внешних компонентов</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">Можно вот так сделать:</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">private</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; { Private declarations }</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; procedure WMDropFiles(var Message: TWMDropFiles); message WM_DROPFILES;</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">public</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; { Public declarations }</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; procedure CreateParams(var Params: TCreateParams); override;</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">end;</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">и вызываем:</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">procedure TfrmMain.CreateParams(var Params: TCreateParams);</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">begin</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; inherited</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; CreateParams(Params);</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; Params.ExStyle := Params.ExStyle or WS_EX_ACCEPTFILES;</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">end;</span></div></li>
+<li class="li2"></li>
+<li class="li1"><div class="de1"><span class="st0">procedure TfrmMain.WMDropFiles(var Message: TWMDropFiles);</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">var</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; aFile: array [0..255] of Char;</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">begin</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; inherited;</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; begin</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; DragQueryFile(Message.drop, 0, aFile, 256);</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; edfile.Text:=aFile;</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; end;</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; DragFinish(Message.Drop);</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">end;</span></div></li>
+<li class="li2"></li>
+<li class="li1"><div class="de1"><span class="st0">procedure TfrmMain.FormCreate(Sender: TObject);</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">begin</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">&nbsp; &nbsp; &nbsp; &nbsp; DragAcceptFiles(Handle, True);</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">end;</span></div></li>
+<li class="li1"></li>
+<li class="li2"><div class="de2"><span class="st0">5. Нужно сделать несколько видов копирования во вкладке Hex</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">Например, как это сделано в WinHex, там очень даже удобно:</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">- Normal</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">- Into new file</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">- -</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">- Hex values</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">- Editor display</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">- -</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">- C Source</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">- Delphi Source</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">- Visual Basic Source</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">- Asm Source</span></div></li>
+<li class="li2"></li>
+<li class="li1"><div class="de1"><span class="st0">6. Разделить значения во вкладке Hex</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">Например имеем (одной строкой):</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">Offset: 00000000h Selsize: 00000000h Selstart: 00000000h</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">Во-первых эти данные нельзя даже скопировать, во-вторых их нельзя получить по отдельности, можно сделать попап, на эту область где сделать пункты, думаю будет удобно:</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">- Copy offset</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">- Copy selsize</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">- Copy selstart</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">- -</span></div></li>
+<li class="li1"><div class="de1"><span class="st0">- Copy all</span></div></li>
+<li class="li2"><div class="de2"><span class="st0">Или просто сделать как обычное копирование у тебя там реализовано.</span></div></li>
+<li class="li1"></li>
+<li class="li2"><div class="de2"><span class="st0">7. Мультиселект во вкладке Import (для копирования)</span></div></li>
+<li class="li1"></li>
+<li class="li2"><div class="de2"><span class="st0">8. Иконку в трее тоже можно реализовать без сторонних компонентов, если надо, могу потом кинуть сырок</span></div></li>
+<li class="li1"></li>
+<li class="li2"><div class="de2"><span class="st0">9. Сделай простейший дамп секций, а то вообще ничего </span></div></li></ol></div><br><br><form name=sub method=post action=add.html onsubmit="javascript:return check(this);">
+<input type=text name=author size=1 value='' maxlength=30 style="width: 200; border-style: solid; border-color: #EFEFEF; background-color: #FFFFFF;"> your name<br><input type="checkbox" name="remember" value="ON"> remember me <br><textarea rows=5 cols=1 name=message style="border-style: solid; border-color: #EFEFEF; width: 100%; height: 200">Советую&nbsp;сделать:
+
+1.&nbsp;Мультиселект&nbsp;во&nbsp;вкладке&nbsp;Sections&nbsp;(для&nbsp;копирования)
+
+2.&nbsp;Мультиселект&nbsp;во&nbsp;вкладке&nbsp;DisAsm&nbsp;(для&nbsp;копирования)
+
+3.&nbsp;Непонятно&nbsp;нахрена&nbsp;юзать&nbsp;компонент&nbsp;для&nbsp;перехода&nbsp;по&nbsp;ссылке,&nbsp;при&nbsp;нажатии&nbsp;на&nbsp;label
+Можно&nbsp;вот&nbsp;так&nbsp;сделать:
+procedure&nbsp;URLink(URL:PChar);
+begin
+&nbsp;&nbsp;&nbsp; ShellExecute(0,&nbsp;nil,&nbsp;URL,&nbsp;nil,&nbsp;nil,&nbsp;SW_NORMAL);
+end;
+и&nbsp;вызываем:
+&nbsp;&nbsp;&nbsp; URLink(PChar('mailto:'+Label1.Caption));
+&nbsp;&nbsp;&nbsp; URLink(PChar('http://'+Label2.Caption));
+Все&nbsp;эти&nbsp;компоненты,&nbsp;сторонних&nbsp;разработчиков,&nbsp;только&nbsp;делают&nbsp;прогу&nbsp;тольще,&nbsp;как&nbsp;тебе&nbsp;известно.
+
+4.&nbsp;Drag&nbsp;and&nbsp;Drop&nbsp;тоже&nbsp;можно&nbsp;легко&nbsp;реализовать&nbsp;без&nbsp;внешних&nbsp;компонентов
+Можно&nbsp;вот&nbsp;так&nbsp;сделать:
+private
+&nbsp;&nbsp;&nbsp; {&nbsp;Private&nbsp;declarations&nbsp;}
+&nbsp;&nbsp;&nbsp; procedure&nbsp;WMDropFiles(var&nbsp;Message:&nbsp;TWMDropFiles);&nbsp;message&nbsp;WM_DROPFILES;
+public
+&nbsp;&nbsp;&nbsp; {&nbsp;Public&nbsp;declarations&nbsp;}
+&nbsp;&nbsp;&nbsp; procedure&nbsp;CreateParams(var&nbsp;Params:&nbsp;TCreateParams);&nbsp;override;
+end;
+и&nbsp;вызываем:
+procedure&nbsp;TfrmMain.CreateParams(var&nbsp;Params:&nbsp;TCreateParams);
+begin
+&nbsp;&nbsp;&nbsp; inherited
+&nbsp;&nbsp;&nbsp; CreateParams(Params);
+&nbsp;&nbsp;&nbsp; Params.ExStyle&nbsp;:=&nbsp;Params.ExStyle&nbsp;or&nbsp;WS_EX_ACCEPTFILES;
+end;
+
+procedure&nbsp;TfrmMain.WMDropFiles(var&nbsp;Message:&nbsp;TWMDropFiles);
+var
+&nbsp;&nbsp;&nbsp; aFile:&nbsp;array&nbsp;[0..255]&nbsp;of&nbsp;Char;
+begin
+&nbsp;&nbsp;&nbsp; inherited;
+&nbsp;&nbsp;&nbsp; begin
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; DragQueryFile(Message.drop,&nbsp;0,&nbsp;aFile,&nbsp;256);
+&nbsp;&nbsp;&nbsp; &nbsp;&nbsp;&nbsp; edfile.Text:=aFile;
+&nbsp;&nbsp;&nbsp; end;
+&nbsp;&nbsp;&nbsp; DragFinish(Message.Drop);
+end;
+
+procedure&nbsp;TfrmMain.FormCreate(Sender:&nbsp;TObject);
+begin
+&nbsp;&nbsp;&nbsp; DragAcceptFiles(Handle,&nbsp;True);
+end;
+
+5.&nbsp;Нужно&nbsp;сделать&nbsp;несколько&nbsp;видов&nbsp;копирования&nbsp;во&nbsp;вкладке&nbsp;Hex
+Например,&nbsp;как&nbsp;это&nbsp;сделано&nbsp;в&nbsp;WinHex,&nbsp;там&nbsp;очень&nbsp;даже&nbsp;удобно:
+-&nbsp;Normal
+-&nbsp;Into&nbsp;new&nbsp;file
+-&nbsp;-
+-&nbsp;Hex&nbsp;values
+-&nbsp;Editor&nbsp;display
+-&nbsp;-
+-&nbsp;C&nbsp;Source
+-&nbsp;Delphi&nbsp;Source
+-&nbsp;Visual&nbsp;Basic&nbsp;Source
+-&nbsp;Asm&nbsp;Source
+
+6.&nbsp;Разделить&nbsp;значения&nbsp;во&nbsp;вкладке&nbsp;Hex
+Например&nbsp;имеем&nbsp;(одной&nbsp;строкой):
+Offset:&nbsp;00000000h&nbsp;Selsize:&nbsp;00000000h&nbsp;Selstart:&nbsp;00000000h
+Во-первых&nbsp;эти&nbsp;данные&nbsp;нельзя&nbsp;даже&nbsp;скопировать,&nbsp;во-вторых&nbsp;их&nbsp;нельзя&nbsp;получить&nbsp;по&nbsp;отдельности,&nbsp;можно&nbsp;сделать&nbsp;попап,&nbsp;на&nbsp;эту&nbsp;область&nbsp;где&nbsp;сделать&nbsp;пункты,&nbsp;думаю&nbsp;будет&nbsp;удобно:
+-&nbsp;Copy&nbsp;offset
+-&nbsp;Copy&nbsp;selsize
+-&nbsp;Copy&nbsp;selstart
+-&nbsp;-
+-&nbsp;Copy&nbsp;all
+Или&nbsp;просто&nbsp;сделать&nbsp;как&nbsp;обычное&nbsp;копирование&nbsp;у&nbsp;тебя&nbsp;там&nbsp;реализовано.
+
+7.&nbsp;Мультиселект&nbsp;во&nbsp;вкладке&nbsp;Import&nbsp;(для&nbsp;копирования)
+
+8.&nbsp;Иконку&nbsp;в&nbsp;трее&nbsp;тоже&nbsp;можно&nbsp;реализовать&nbsp;без&nbsp;сторонних&nbsp;компонентов,&nbsp;если&nbsp;надо,&nbsp;могу&nbsp;потом&nbsp;кинуть&nbsp;сырок
+
+9.&nbsp;Сделай&nbsp;простейший&nbsp;дамп&nbsp;секций,&nbsp;а&nbsp;то&nbsp;вообще&nbsp;ничего</textarea><br><input type=submit name=post value=submit></form><tr><td height=1 bgcolor=#EAEAEA id=1>
+ <tr><td>codesaver 1.1
+ <tr><td height=10>
+ </table>
+ <script>
+ function post(id)
+ {
+ s = "style=\"width: 200; border-style: solid; border-color: #EFEFEF; background-color: #FFFFFF;\">";
+ z = "style=\"border-style: solid; border-color: #EFEFEF; width: 100%; height: 250\">";
+ aa = "<form name=sub method=post action=";
+ bb = ">";
+ cc = " <input type=text name=author size=1 value='' maxlength=30 ";
+ d = " your name<br><input type=\"checkbox\" name=\"remember\" value=\"ON\"> remember me";
+ e = " <br><textarea rows=5 cols=1 name=message ";
+ f = "</textarea><br><input type=submit name=post value=submit></fo"+"rm>";
+ p = "add.html";
+ u = " onsubmit=\"return check(this)\"";
+ document.getElementById(id).innerHTML = aa+p+u+bb+cc+s+d+e+z+f;
+ }
+ function check(form)
+ {
+ if (form.message.value == "") {alert('please, type a text'); return false; }
+ if (form.author.value == "") {alert('please, type a name'); return false; }
+ if (form.id.value == "") {alert('please, select subject'); return false; }
+ return true;
+ }
+ </script>
+ </body></html>

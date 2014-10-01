@@ -1,0 +1,1 @@
+This demo program compiles without change in Delphi 4-7. To compile in Delphi 3, remove the ImgList unit from the interface section uses statement.

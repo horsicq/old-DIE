@@ -1,0 +1,54 @@
+package alvpkgd7;
+
+{$R *.res}
+{$R 'alvreg.dcr'}
+{$R 'PictureContainerReg.dcr'}
+{$ALIGN 8}
+{$ASSERTIONS ON}
+{$BOOLEVAL OFF}
+{$DEBUGINFO ON}
+{$EXTENDEDSYNTAX ON}
+{$IMPORTEDDATA ON}
+{$IOCHECKS ON}
+{$LOCALSYMBOLS ON}
+{$LONGSTRINGS ON}
+{$OPENSTRINGS ON}
+{$OPTIMIZATION ON}
+{$OVERFLOWCHECKS OFF}
+{$RANGECHECKS OFF}
+{$REFERENCEINFO ON}
+{$SAFEDIVIDE OFF}
+{$STACKFRAMES OFF}
+{$TYPEDADDRESS OFF}
+{$VARSTRINGCHECKS ON}
+{$WRITEABLECONST ON}
+{$MINENUMSIZE 1}
+{$IMAGEBASE $400000}
+{$DESCRIPTION 'TMS TAdvListView Component'}
+{$IMPLICITBUILD OFF}
+
+requires
+  vcl,
+  vclx,
+  vcldb,
+  designide,
+  rtl,
+  dbrtl,
+  vclactnband;
+
+contains
+  alvreg in 'alvreg.pas',
+  PictureContainerReg in 'PictureContainerReg.pas',
+  PictureContainerDE in 'PictureContainerDE.pas',
+  PictureContainerProp in 'PictureContainerProp.pas',
+  PictureContainer in 'PictureContainer.pas',
+  HTMListB in 'HTMListB.pas',
+  AlvDE in 'alvde.pas',
+  DBAdvLst in 'DBAdvLst.pas',
+  DBAlvDE in 'DBAlvDE.pas',
+  AlvUtil in 'alvutil.pas',
+  AdvListV in 'AdvListV.pas',
+  AdvGradient in 'AdvGradient.pas',
+  AlvRegDe in 'alvregde.pas';
+
+end.

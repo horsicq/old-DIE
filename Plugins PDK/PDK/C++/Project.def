@@ -1,0 +1,6 @@
+LIBRARY Project
+EXPORTS
+	DiePlugName   ; Описываем используемые функции
+	DiePlugProc   ; первые 2 обязательно должны присутствовать!
+	DiePlugHwnd
+	DiePlugPe
